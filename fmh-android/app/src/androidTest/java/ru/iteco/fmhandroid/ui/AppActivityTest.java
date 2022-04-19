@@ -792,6 +792,6 @@ public class AppActivityTest {
 
         onView(withIndex(withId(R.id.our_mission_item_title_text_view), 0)).perform(click());
         onView(withIndex(withId(R.id.our_mission_item_description_text_view), 0)).check(matches(not(isDisplayed())));
-        
+
     }
 }

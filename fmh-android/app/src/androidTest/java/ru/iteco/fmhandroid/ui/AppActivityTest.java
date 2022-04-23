@@ -46,6 +46,7 @@ import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
 import androidx.test.filters.LargeTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -54,20 +55,27 @@ import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsInstanceOf;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import ru.iteco.fmhandroid.R;
 
-
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @LargeTest
-@RunWith(AndroidJUnit4.class)
+//@RunWith(AndroidJUnit4.class)
+@RunWith(AllureAndroidJUnit4.class)
 public class AppActivityTest {
 
     @Rule
@@ -199,12 +207,17 @@ public class AppActivityTest {
         return view.getParent();
     }
 
-    public void login() {
+    @Before
+    public void loginCheck() {
         SystemClock.sleep(8000);
         ViewInteraction textView = onView(
                 allOf(withText("Authorization"),
                         withParent(withParent(withId(R.id.nav_host_fragment)))));
-        textView.check(matches(isDisplayed()));
+        try {
+            textView.check(matches(isDisplayed()));
+        } catch (NoMatchingViewException e) {
+            return;
+        }
         ViewInteraction login = onView(
                 allOf(withHint("Login"), withParent(withParent(withId(R.id.login_text_input_layout)))));
         login.check(matches(isEnabled()));
@@ -222,110 +235,10 @@ public class AppActivityTest {
         button.perform(click());
     }
 
-    @Test
-    public void signInVisible() {
-        SystemClock.sleep(8000);
-        ViewInteraction textView = onView(
-                allOf(withText("Authorization"),
-                        withParent(withParent(withId(R.id.nav_host_fragment)))));
-        textView.check(matches(isDisplayed()));
-        ViewInteraction editText = onView(
-                allOf(withHint("Login")));
-        editText.check(matches(isEnabled()));
 
-        ViewInteraction editText2 = onView(
-                allOf(withHint("Password"),
-                        withParent(withParent(withId(R.id.password_text_input_layout)))));
-        editText2.check(matches(isEnabled()));
-
-        ViewInteraction button = onView(
-                allOf(withId(R.id.enter_button), withText("SIGN IN"), withContentDescription("Save"),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(android.widget.RelativeLayout.class))),
-                        isDisplayed()));
-        button.check(matches(isClickable()));
-    }
-
-    @Test
-    public void signInWrong() {
-        SystemClock.sleep(8000);
-        ViewInteraction textView = onView(
-                allOf(withText("Authorization"),
-                        withParent(withParent(withId(R.id.nav_host_fragment)))));
-        textView.check(matches(isDisplayed()));
-        ViewInteraction login = onView(
-                allOf(withHint("Login"), withParent(withParent(withId(R.id.login_text_input_layout)))));
-        login.check(matches(isEnabled()));
-        ViewInteraction password = onView(
-                allOf(withHint("Password"),
-                        withParent(withParent(withId(R.id.password_text_input_layout)))));
-        password.check(matches(isEnabled()));
-        ViewInteraction button = onView(
-                allOf(withId(R.id.enter_button), withText("SIGN IN"), withContentDescription("Save"),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(android.widget.RelativeLayout.class))),
-                        isDisplayed()));
-        button.check(matches(isClickable()));
-        button.perform(click());
-        onView(withText(R.string.empty_login_or_password))
-                .inRoot(withDecorView(not(is(mActivityTestRule.getActivity().getWindow().getDecorView()))))
-                .check(matches(withText("Login and password cannot be empty")));
-
-        SystemClock.sleep(1000);
-        login.perform(typeText(" "));
-        password.perform(typeText(" "));
-        button.perform(click());
-        onView(withText(R.string.empty_login_or_password))
-                .inRoot(withDecorView(not(is(mActivityTestRule.getActivity().getWindow().getDecorView()))))
-                .check(matches(withText("Login and password cannot be empty")));
-
-        SystemClock.sleep(1000);
-        login.perform(clearText(), typeText("123"));
-        password.perform(clearText(), typeText("123"));
-        button.perform(click());
-        onView(withText(R.string.wrong_login_or_password))
-                .inRoot(withDecorView(not(is(mActivityTestRule.getActivity().getWindow().getDecorView()))))
-                .check(matches(withText("Wrong login or password")));
-    }
-
-    @Test
-    public void signInOK() {
-        SystemClock.sleep(8000);
-        ViewInteraction textView = onView(
-                allOf(withText("Authorization"),
-                        withParent(withParent(withId(R.id.nav_host_fragment)))));
-        textView.check(matches(isDisplayed()));
-        ViewInteraction login = onView(
-                allOf(withHint("Login"), withParent(withParent(withId(R.id.login_text_input_layout)))));
-        login.check(matches(isEnabled()));
-        ViewInteraction password = onView(
-                allOf(withHint("Password"),
-                        withParent(withParent(withId(R.id.password_text_input_layout)))));
-        password.check(matches(isEnabled()));
-        ViewInteraction button = onView(
-                allOf(withId(R.id.enter_button), withText("SIGN IN"), withContentDescription("Save"),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(android.widget.RelativeLayout.class))),
-                        isDisplayed()));
-        button.check(matches(isClickable()));
-
-        login.perform(typeText("login2"));
-        password.perform(typeText("password2"));
-        button.perform(click());
-        SystemClock.sleep(2000);
-        ViewInteraction news = onView((withText("News")));
-        news.check(matches(isDisplayed()));
-        ViewInteraction claims = onView((withText("Claims")));
-        claims.check(matches(isDisplayed()));
-        ViewInteraction man = onView((withId(R.id.authorization_image_button)));
-        man.perform(click());
-        ViewInteraction exitButton = onView((withText("Log out")));
-        exitButton.perform(click());
-        SystemClock.sleep(2000);
-    }
-
-    //    todo Категория. "Можно объединить несколько тестов в категорию, например medium (Чтобы запустить их разом)"
     @Test
     public void expandAll() {
-//        login();
-        SystemClock.sleep(12000);
+        SystemClock.sleep(8000);
         ViewInteraction exNews = onView(
                 allOf(withId(R.id.expand_material_button),
                         childAtPosition(
@@ -792,6 +705,5 @@ public class AppActivityTest {
 
         onView(withIndex(withId(R.id.our_mission_item_title_text_view), 0)).perform(click());
         onView(withIndex(withId(R.id.our_mission_item_description_text_view), 0)).check(matches(not(isDisplayed())));
-
     }
 }

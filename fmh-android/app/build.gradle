@@ -55,6 +55,7 @@ dependencies {
     androidTestImplementation 'androidx.test:rules:1.4.1-alpha05'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.5.0-alpha05'
+    androidTestImplementation 'io.qameta.allure:allure-kotlin-android:2.0.0'
     def retrofit_version = "2.9.0"
     def retrofit_gson_version = "2.9.0"
     def okhttp_logging_version = "4.9.2"

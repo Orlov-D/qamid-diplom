@@ -9,7 +9,6 @@ import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
-import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
@@ -26,7 +25,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -45,8 +43,6 @@ import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.espresso.util.HumanReadables;
-import androidx.test.filters.LargeTest;
-import androidx.test.filters.MediumTest;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -56,26 +52,20 @@ import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.junit.runners.MethodSorters;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
-import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import ru.iteco.fmhandroid.R;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@LargeTest
-//@RunWith(AndroidJUnit4.class)
-@RunWith(AllureAndroidJUnit4.class)
+@RunWith(AndroidJUnit4.class)
+//@RunWith(AllureAndroidJUnit4.class)
 public class AppActivityTest {
 
     @Rule
@@ -209,7 +199,7 @@ public class AppActivityTest {
 
     @Before
     public void loginCheck() {
-        SystemClock.sleep(8000);
+        SystemClock.sleep(7000);
         ViewInteraction textView = onView(
                 allOf(withText("Authorization"),
                         withParent(withParent(withId(R.id.nav_host_fragment)))));
@@ -233,12 +223,12 @@ public class AppActivityTest {
         login.perform(typeText("login2"));
         password.perform(typeText("password2"));
         button.perform(click());
+        SystemClock.sleep(2000);
     }
 
 
     @Test
     public void expandAll() {
-        SystemClock.sleep(8000);
         ViewInteraction exNews = onView(
                 allOf(withId(R.id.expand_material_button),
                         childAtPosition(
@@ -269,21 +259,18 @@ public class AppActivityTest {
 
     @Test
     public void openAllNews() {
-        SystemClock.sleep(10000);
         ViewInteraction allNews = onView((withId(R.id.all_news_text_view))).perform(click());
         ViewInteraction sortButton = onView((withId(R.id.sort_news_material_button))).check(matches(isDisplayed()));
     }
 
     @Test
     public void openAllClaims() {
-        SystemClock.sleep(10000);
         ViewInteraction allClaims = onView((withId(R.id.all_claims_text_view))).perform(click());
         ViewInteraction addNewClaimButton = onView((withId(R.id.add_new_claim_material_button))).check(matches(isDisplayed()));
     }
 
     @Test
     public void expandSingleNews() {
-        SystemClock.sleep(6000);
         ViewInteraction expandNews = onView(
                 allOf(withId(R.id.news_list_recycler_view),
                         childAtPosition(
@@ -301,7 +288,6 @@ public class AppActivityTest {
 
     @Test
     public void openSingleClaim() {
-        SystemClock.sleep(6000);
         ViewInteraction firstClaim = onView(
                 allOf(withIndex(withId(R.id.executor_name_material_text_view), 0)));
         firstClaim.perform(click());
@@ -324,9 +310,12 @@ public class AppActivityTest {
 
     @Test
     public void createClaim() {
-        SystemClock.sleep(7000);
-        String claimTitleString = "Прувет Орл";
+        String claimTitleString = "Прувет Орл " + getCurrentDate() + "T" + getCurrentTime();
+        String newClaimTitleString = "Некое описание " + getCurrentDate();
+        String currentDate = getCurrentDate();
+        String currentTime = getCurrentTime();
         ViewInteraction buttonCreateClaim = onView(withId(R.id.add_new_claim_material_button)).perform(click());
+        SystemClock.sleep(2000);
 
         ViewInteraction title = onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
         ViewInteraction subTitle = onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("Claims")));
@@ -344,9 +333,9 @@ public class AppActivityTest {
         SystemClock.sleep(2000);
         claimTitle.perform(click());
 
-        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText("09.04.2022"));
-        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText("09:10"));
-        onView(withId(R.id.description_edit_text)).perform(replaceText("Некое описание"));
+        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText(currentDate));
+        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText(currentTime));
+        onView(withId(R.id.description_edit_text)).perform(replaceText(newClaimTitleString));
 
         SystemClock.sleep(2000);
         onView(withId(R.id.description_edit_text)).perform(closeSoftKeyboard());
@@ -366,15 +355,18 @@ public class AppActivityTest {
         onView(withId(R.id.executor_drop_menu_auto_complete_text_view)).perform(click());
         SystemClock.sleep(2000);
         claimTitle.perform(click());
-        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText("09.04.2022"));
-        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText("09:10"));
-        onView(withId(R.id.description_edit_text)).perform(replaceText("Некое описание"));
+        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText(currentDate));
+        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText(currentTime));
+        onView(withId(R.id.description_edit_text)).perform(replaceText(newClaimTitleString));
         onView(withId(R.id.description_edit_text)).perform(closeSoftKeyboard());
         onView(withId(R.id.save_button)).perform(click());
 
         ViewInteraction allClaims = onView((withId(R.id.all_claims_text_view))).perform(click());
-        if (isDisplayedWithSwipe(claimTitleString, 2)) {
+
+        if (isDisplayedWithSwipe(onView(withText(claimTitleString)), 2, true)) {
             onView(withText(claimTitleString)).check(matches(isDisplayed()));
+        } else {
+            throw new NoSuchElementException("Not found " + onView(withText(claimTitleString)).toString());
         }
         ;
     }
@@ -382,10 +374,12 @@ public class AppActivityTest {
     public void checkClaimStatus(String status) {
         ViewInteraction firstClaim = onView(
                 allOf(withIndex(withId(R.id.executor_name_material_text_view), 0)));
+        SystemClock.sleep(1000);
         firstClaim.perform(click());
         ViewInteraction claimStatus = onView(
                 allOf(withId(R.id.status_label_text_view),
                         withParent(withParent(IsInstanceOf.<View>instanceOf(androidx.cardview.widget.CardView.class)))));
+        SystemClock.sleep(1000);
         claimStatus.check(matches(allOf(isDisplayed(), withText(status))));
         ViewInteraction backButton = onView(withId(R.id.close_image_button)).perform(nestedScrollTo());
         backButton.perform(click());
@@ -393,7 +387,6 @@ public class AppActivityTest {
 
     @Test
     public void filteringClaims() {
-        SystemClock.sleep(6000);
         onView((withId(R.id.all_claims_text_view))).perform(click());
         ViewInteraction buttonFiltering = onView((withId(R.id.filters_material_button))).perform(click());
         ViewInteraction titleFiltering = onView((withId(R.id.claim_filter_dialog_title))).check(matches(isDisplayed()));
@@ -437,7 +430,6 @@ public class AppActivityTest {
 
     @Test
     public void claimScreen() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("Claims")).perform(click());
         onView(withText("Claims")).check(matches(isDisplayed()));
@@ -449,7 +441,6 @@ public class AppActivityTest {
 
     @Test
     public void newsScreenSorting() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("News")).perform(click());
         onView(withText("News")).check(matches(isDisplayed()));
@@ -465,7 +456,6 @@ public class AppActivityTest {
 
     @Test
     public void controlPanelSorting() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("News")).perform(click());
         onView(withText("News")).check(matches(isDisplayed()));
@@ -488,7 +478,6 @@ public class AppActivityTest {
 
     @Test
     public void controlPanelCreateNews() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("News")).perform(click());
         onView(withText("News")).check(matches(isDisplayed()));
@@ -526,25 +515,38 @@ public class AppActivityTest {
 
         onView(withId(R.id.save_button)).perform(click());
         onView(withText("Control panel")).check(matches(isDisplayed()));
-        boolean invis = true;
-        int n = 2;
-        while (invis) {
-            try {
-                onView(withText(newsTitle)).check(matches(isDisplayed()));
-                invis = false;
-            } catch (NoMatchingViewException ignored) {
-            }
-            onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
-            n = n + 2;
+        if (isDisplayedWithSwipe(onView(withText(newsTitle)), 1, true)) {
+            onView(withText(newsTitle)).check(matches(isDisplayed()));
         }
-        ;
-        onView(withText(newsTitle)).check(matches(isDisplayed()));
+
+        onView(allOf(withId(R.id.delete_news_item_image_view), withParent(withParent(allOf(withId(R.id.news_item_material_card_view), withChild(withChild(withText(newsTitle)))))))).perform(click());
+        onView(withText("OK")).perform(click());
     }
 
 
     @Test
     public void newsScreenFiltering() {
-        SystemClock.sleep(6000);
+        onView(withId(R.id.main_menu_image_button)).perform(click());
+        onView(withText("News")).perform(click());
+        onView(withText("News")).check(matches(isDisplayed()));
+
+        onView(withId(R.id.edit_news_material_button)).perform(click());
+        onView(withText("Control panel")).check(matches(isDisplayed()));
+        onView(withId(R.id.add_news_image_view)).perform(click());
+        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
+        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
+        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
+        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
+        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle));
+        onView(withId(R.id.news_item_publish_date_text_input_edit_text)).perform(replaceText(newsPublicationDate));
+        onView(withId(R.id.news_item_publish_time_text_input_edit_text)).perform(replaceText("07:22"));
+        onView(withId(R.id.news_item_description_text_input_edit_text)).perform(replaceText(newsDescription),
+                closeSoftKeyboard());
+        onView(withId(R.id.switcher)).check(matches(allOf(withText("Active"), isDisplayed())));
+
+        onView(withId(R.id.save_button)).perform(click());
+        onView(withText("Control panel")).check(matches(isDisplayed()));
+
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("News")).perform(click());
         onView(withText("News")).check(matches(isDisplayed()));
@@ -593,11 +595,14 @@ public class AppActivityTest {
 
         onView(withIndex(withId(R.id.news_item_publication_date_text_view), 0)).check(matches(withText(newsPublicationDate)));
         onView(withIndex(withId(R.id.news_item_published_text_view), 0)).check(matches(withText("Active")));
+
+        onView(withId(R.id.delete_news_item_image_view)).perform(click());
+        onView(withText("OK")).perform(click());
     }
 
-    public boolean isDisplayedWithSwipe(String locator, int recycler) {
+    public boolean isDisplayedWithSwipe(ViewInteraction locator, int recycler, boolean finishSwipe) {
         try {
-            onView(withText(locator)).check(matches(isDisplayed()));
+            locator.check(matches(isDisplayed()));
             return true;
         } catch (NoMatchingViewException ignored) {
         }
@@ -614,15 +619,27 @@ public class AppActivityTest {
                 return false;
             }
             try {
-                onView(withText(locator)).check(matches(isDisplayed()));
+                locator.check(matches(isDisplayed()));
                 invis = false;
             } catch (NoMatchingViewException e) {
                 invis = true;
             }
-            n = n + 1;
+            n++;
+            if (!invis & finishSwipe) {
+                try {
+                    if (recycler == 1) {
+                        onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                    } else {
+                        onView(allOf(withId(R.id.claim_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                    }
+                } catch (PerformException e) {
+                    return false;
+                }
+            }
             if (n > 400) {
                 return false;
             }
+            SystemClock.sleep(2000);
         }
         ;
         return true;
@@ -630,7 +647,6 @@ public class AppActivityTest {
 
     @Test
     public void newsEditingDeleting() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("News")).perform(click());
         onView(withText("News")).check(matches(isDisplayed()));
@@ -638,13 +654,28 @@ public class AppActivityTest {
         onView(withId(R.id.edit_news_material_button)).perform(click());
         onView(withText("Control panel")).check(matches(isDisplayed()));
 
-        if (isDisplayedWithSwipe(newsTitle, 1)) {
+        onView(withId(R.id.add_news_image_view)).perform(click());
+        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
+        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
+        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
+        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
+        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle));
+        onView(withId(R.id.news_item_publish_date_text_input_edit_text)).perform(replaceText(newsPublicationDate));
+        onView(withId(R.id.news_item_publish_time_text_input_edit_text)).perform(replaceText(getCurrentTime()));
+        onView(withId(R.id.news_item_description_text_input_edit_text)).perform(replaceText(newsDescription),
+                closeSoftKeyboard());
+        onView(withId(R.id.switcher)).check(matches(allOf(withText("Active"), isDisplayed())));
+
+        onView(withId(R.id.save_button)).perform(click());
+        onView(withText("Control panel")).check(matches(isDisplayed()));
+
+        if (isDisplayedWithSwipe(onView(withText(newsTitle)), 1, true)) {
             onView(withText(newsTitle)).check(matches(isDisplayed())).perform(click());
         }
-        onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(2, swipeUp()));
+
         String result = TextHelpers.getText(onView(withText(newsDescription)));
         assertEquals(result, newsDescription);
-        onView(withText(newsTitle)).check(matches(isDisplayed())).perform(click());
+        onView(withText(newsTitle)).perform(click());
         SystemClock.sleep(1500);
         onView(withText(newsDescription)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
 
@@ -657,15 +688,14 @@ public class AppActivityTest {
         onView(withId(R.id.save_button)).perform(click());
 
         onView(withText("Control panel")).check(matches(isDisplayed()));
-        if (isDisplayedWithSwipe(newNewsTitle, 1)) {
+        if (isDisplayedWithSwipe(onView(withText(newNewsTitle)), 1, true)) {
             onView(withText(newNewsTitle)).check(matches(isDisplayed()));
         }
-        onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(2, swipeUp()));
 
         onView(allOf(withId(R.id.delete_news_item_image_view), withParent(withParent(allOf(withId(R.id.news_item_material_card_view), withChild(withChild(withText(newNewsTitle)))))))).perform(click());
         onView(withText("OK")).perform(click());
         SystemClock.sleep(1500);
-        if (isDisplayedWithSwipe(newNewsTitle, 1)) {
+        if (isDisplayedWithSwipe(onView(withText(newNewsTitle)), 1, false)) {
             onView(withText(newNewsTitle)).check(matches(not(isDisplayed())));
         }
     }
@@ -676,9 +706,14 @@ public class AppActivityTest {
         return dateFormat.format(currentDate);
     }
 
+    public String getCurrentTime() {
+        Date currentDate = new Date();
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        return dateFormat.format(currentDate);
+    }
+
     @Test
     public void aboutScreenAndBackToMain() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.main_menu_image_button)).perform(click());
         onView(withText("About")).perform(click());
         onView(withId(R.id.about_version_title_text_view)).check(matches(allOf(withText("Version:"), isDisplayed())));
@@ -695,7 +730,6 @@ public class AppActivityTest {
 
     @Test
     public void thematicQuotes() {
-        SystemClock.sleep(6000);
         onView(withId(R.id.our_mission_image_button)).perform(click());
         onView(withId(R.id.our_mission_title_text_view)).check(matches(allOf(withText("Love is all"), isDisplayed())));
         onView(withIndex(withId(R.id.our_mission_item_image_view), 0)).check(matches(isDisplayed()));

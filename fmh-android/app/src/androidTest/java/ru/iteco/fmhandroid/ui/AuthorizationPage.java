@@ -139,7 +139,7 @@ public class AuthorizationPage {
         login.perform(typeText("login2"));
         password.perform(typeText("password2"));
         button.perform(click());
-        SystemClock.sleep(2000);
+        SystemClock.sleep(2500);
         ViewInteraction news = onView((withText("News")));
         news.check(matches(isDisplayed()));
         ViewInteraction claims = onView((withText("Claims")));

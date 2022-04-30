@@ -27,19 +27,21 @@ import androidx.test.rule.ActivityTestRule;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import ru.iteco.fmhandroid.R;
 
+@RunWith(AllureAndroidJUnit4.class)
 public class AuthorizationPage {
     @Rule
     public ActivityTestRule<AppActivity> mActivityTestRule = new ActivityTestRule<>(AppActivity.class);
 
     @Before
     public void logoutCheck() {
-        SystemClock.sleep(8000);
+        SystemClock.sleep(7000);
         ViewInteraction textView = onView(
                 allOf(withText("Authorization"),
                         withParent(withParent(withId(R.id.nav_host_fragment)))));

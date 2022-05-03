@@ -5,14 +5,12 @@ import static androidx.test.espresso.action.ViewActions.clearText;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.replaceText;
-import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.action.ViewActions.typeText;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;
-import static androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static androidx.test.espresso.matcher.ViewMatchers.isChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
-import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
@@ -28,284 +26,124 @@ import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.os.SystemClock;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.FrameLayout;
-import android.widget.TextView;
+import static ru.iteco.fmhandroid.ui.utils.Utils.*;
 
-import androidx.core.widget.NestedScrollView;
+import android.os.SystemClock;
+
 import androidx.test.espresso.NoMatchingViewException;
-import androidx.test.espresso.PerformException;
-import androidx.test.espresso.UiController;
-import androidx.test.espresso.ViewAction;
 import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.matcher.ViewMatchers;
-import androidx.test.espresso.util.HumanReadables;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
-import org.hamcrest.TypeSafeMatcher;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import ru.iteco.fmhandroid.R;
+import ru.iteco.fmhandroid.ui.elements.AuthorizationScreen;
+import ru.iteco.fmhandroid.ui.elements.EditClaimScreen;
+import ru.iteco.fmhandroid.ui.elements.MainScreen;
+import ru.iteco.fmhandroid.ui.elements.NewsScreen;
+import ru.iteco.fmhandroid.ui.elements.CreateClaimScreen;
+import ru.iteco.fmhandroid.ui.elements.CommonElements;
+import ru.iteco.fmhandroid.ui.elements.ClaimScreen;
+import ru.iteco.fmhandroid.ui.elements.ControlPanel;
+import ru.iteco.fmhandroid.ui.elements.CreateNewsScreen;
+import ru.iteco.fmhandroid.ui.elements.NewsFilterScreen;
+import ru.iteco.fmhandroid.ui.elements.AboutScreen;
+import ru.iteco.fmhandroid.ui.elements.ThematicQuotes;
 
 @RunWith(AndroidJUnit4.class)
 //@RunWith(AllureAndroidJUnit4.class)
 public class AppActivityTest {
+    NewsScreen NewsScreen = new NewsScreen();
+    MainScreen MainScreen = new MainScreen();
+    AuthorizationScreen AuthorizationScreen = new AuthorizationScreen();
+    EditClaimScreen EditClaimScreen = new EditClaimScreen();
+    CreateClaimScreen CreateClaimScreen = new CreateClaimScreen();
+    CommonElements CommonElements = new CommonElements();
+    ClaimScreen ClaimScreen = new ClaimScreen();
+    ControlPanel ControlPanel = new ControlPanel();
+    CreateNewsScreen CreateNewsScreen = new CreateNewsScreen();
+    NewsFilterScreen NewsFilterScreen = new NewsFilterScreen();
+    AboutScreen AboutScreen = new AboutScreen();
+    ThematicQuotes ThematicQuotes = new ThematicQuotes();
+
+
+    public static String newsTitle = "Некий заголовок";
+    public static String newsDescriptionString = "Пробе пера";
+    public static String newNewsTitle = "Чудо чудесное";
+    String newsPublicationDate = "07.04.2022";
 
     @Rule
     public ActivityTestRule<AppActivity> mActivityTestRule = new ActivityTestRule<>(AppActivity.class);
 
-    public static Matcher<View> withIndex(final Matcher<View> matcher, final int index) {
-        return new TypeSafeMatcher<View>() {
-            int currentIndex = 0;
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("with index: ");
-                description.appendValue(index);
-                matcher.describeTo(description);
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                return matcher.matches(view) && currentIndex++ == index;
-            }
-        };
-    }
-
-    private static Matcher<View> childAtPosition(final Matcher<View> parentMatcher, final int position) {
-
-        return new TypeSafeMatcher<View>() {
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Child at position " + position + " in parent ");
-                parentMatcher.describeTo(description);
-            }
-
-            @Override
-            public boolean matchesSafely(View view) {
-                ViewParent parent = view.getParent();
-                return parent instanceof ViewGroup && parentMatcher.matches(parent)
-                        && view.equals(((ViewGroup) parent).getChildAt(position));
-            }
-        };
-    }
-
-    public static ViewAction nestedScrollTo() {
-        return new ViewAction() {
-
-            @Override
-            public Matcher<View> getConstraints() {
-                return Matchers.allOf(
-                        isDescendantOfA(isAssignableFrom(NestedScrollView.class)),
-                        withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE));
-            }
-
-            @Override
-            public String getDescription() {
-                return "View is not NestedScrollView";
-            }
-
-            @Override
-            public void perform(UiController uiController, View view) {
-                try {
-                    NestedScrollView nestedScrollView = (NestedScrollView)
-                            findFirstParentLayoutOfClass(view);
-                    if (nestedScrollView != null) {
-                        nestedScrollView.scrollTo(0, view.getTop());
-                    } else {
-                        throw new Exception("Unable to find NestedScrollView parent.");
-                    }
-                } catch (Exception e) {
-                    throw new PerformException.Builder()
-                            .withActionDescription(this.getDescription())
-                            .withViewDescription(HumanReadables.describe(view))
-                            .withCause(e)
-                            .build();
-                }
-                uiController.loopMainThreadUntilIdle();
-            }
-
-        };
-    }
-
-    public static class TextHelpers {
-        public static String getText(ViewInteraction matcher) {
-            final String[] text = new String[1];
-            ViewAction va = new ViewAction() {
-
-                @Override
-                public Matcher<View> getConstraints() {
-                    return isAssignableFrom(TextView.class);
-                }
-
-                @Override
-                public String getDescription() {
-                    return "Text of the view";
-                }
-
-                @Override
-                public void perform(UiController uiController, View view) {
-                    TextView tv = (TextView) view;
-                    text[0] = tv.getText().toString();
-                }
-            };
-
-            matcher.perform(va);
-
-            return text[0];
-        }
-    }
-
-    private static View findFirstParentLayoutOfClass(View view) {
-        ViewParent parent = new FrameLayout(view.getContext());
-        ViewParent incrementView = null;
-        int i = 0;
-        while (parent != null && !(parent.getClass() == NestedScrollView.class)) {
-            if (i == 0) {
-                parent = findParent(view);
-            } else {
-                parent = findParent(incrementView);
-            }
-            incrementView = parent;
-            i++;
-        }
-        return (View) parent;
-    }
-
-    private static ViewParent findParent(View view) {
-        return view.getParent();
-    }
-
-    private static ViewParent findParent(ViewParent view) {
-        return view.getParent();
-    }
-
     @Before
     public void loginCheck() {
         SystemClock.sleep(7000);
-        ViewInteraction textView = onView(
-                allOf(withText("Authorization"),
-                        withParent(withParent(withId(R.id.nav_host_fragment)))));
         try {
-            textView.check(matches(isDisplayed()));
+            AuthorizationScreen.authorization.check(matches(isDisplayed()));
         } catch (NoMatchingViewException e) {
             return;
         }
-        ViewInteraction login = onView(
-                allOf(withHint("Login"), withParent(withParent(withId(R.id.login_text_input_layout)))));
-        login.check(matches(isEnabled()));
-        ViewInteraction password = onView(
-                allOf(withHint("Password"),
-                        withParent(withParent(withId(R.id.password_text_input_layout)))));
-        password.check(matches(isEnabled()));
-        ViewInteraction button = onView(
-                allOf(withId(R.id.enter_button), withText("SIGN IN"), withContentDescription("Save"),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(android.widget.RelativeLayout.class))),
-                        isDisplayed()));
-        button.check(matches(isClickable()));
-        login.perform(typeText("login2"));
-        password.perform(typeText("password2"));
-        button.perform(click());
+        AuthorizationScreen.login.check(matches(isEnabled()));
+        AuthorizationScreen.password.check(matches(isEnabled()));
+        AuthorizationScreen.buttonSignIn.check(matches(isClickable()));
+        AuthorizationScreen.login.perform(typeText("login2"));
+        AuthorizationScreen.password.perform(typeText("password2"));
+        AuthorizationScreen.buttonSignIn.perform(click());
         SystemClock.sleep(2000);
     }
 
 
     @Test
     public void expandAll() {
-        ViewInteraction exNews = onView(
-                allOf(withId(R.id.expand_material_button),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.container_list_news_include_on_fragment_main),
-                                        0),
-                                4),
-                        isDisplayed()));
-        exNews.perform(click());
-        ViewInteraction allNews = onView((withId(R.id.all_news_text_view))).check(matches(not(isDisplayed())));
-        ViewInteraction exClaims = onView(
-                allOf(withId(R.id.expand_material_button),
-                        childAtPosition(
-                                childAtPosition(
-                                        withId(R.id.container_list_claim_include_on_fragment_main),
-                                        0),
-                                3),
-                        isDisplayed()));
-        exClaims.perform(click());
-        ViewInteraction allClaims = onView((withId(R.id.all_claims_text_view))).check(matches(not(isDisplayed())));
+        MainScreen.expandAllNews.check(matches(isDisplayed()));
+        MainScreen.expandAllNews.perform(click());
+        MainScreen.allNews.check(matches(not(isDisplayed())));
+        MainScreen.expandClaims.check(matches(isDisplayed()));
+        MainScreen.expandClaims.perform(click());
+        MainScreen.allClaims.check(matches(not(isDisplayed())));
 
-        exNews.perform(click());
-        allNews.check(matches(isDisplayed()));
-        exClaims.perform(click());
-        allClaims.check(matches(isDisplayed()));
-        SystemClock.sleep(2000);
+        MainScreen.expandAllNews.perform(click());
+        MainScreen.allNews.check(matches(isDisplayed()));
+        MainScreen.expandClaims.perform(click());
+        MainScreen.allClaims.check(matches(isDisplayed()));
     }
 
     @Test
     public void openAllNews() {
-        ViewInteraction allNews = onView((withId(R.id.all_news_text_view))).perform(click());
-        ViewInteraction sortButton = onView((withId(R.id.sort_news_material_button))).check(matches(isDisplayed()));
+        MainScreen.allNews.perform(click());
+        NewsScreen.buttonSort.check(matches(isDisplayed()));
     }
 
     @Test
     public void openAllClaims() {
-        ViewInteraction allClaims = onView((withId(R.id.all_claims_text_view))).perform(click());
-        ViewInteraction addNewClaimButton = onView((withId(R.id.add_new_claim_material_button))).check(matches(isDisplayed()));
+        MainScreen.allClaims.perform(click());
+        MainScreen.addNewClaimButton.check(matches(isDisplayed()));
+        MainScreen.allNews.check(doesNotExist());
     }
 
     @Test
     public void expandSingleNews() {
-        ViewInteraction expandNews = onView(
-                allOf(withId(R.id.news_list_recycler_view),
-                        childAtPosition(
-                                withId(R.id.all_news_cards_block_constraint_layout),
-                                0)));
-        expandNews.perform(actionOnItemAtPosition(0, click()));
-        SystemClock.sleep(2000);
-        ViewInteraction newsDescription = onView(withIndex(withId(R.id.view_news_item_image_view), 0));
-        newsDescription.check(matches(isDisplayed()));
-
-        onView(withIndex(withId(R.id.category_icon_image_view), 0)).perform(click());
-        ViewInteraction newsDescription2 = onView(withIndex(withId(R.id.view_news_item_image_view), 0))
-                .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
+        MainScreen.expandSingleNews.perform(actionOnItemAtPosition(0, click()));
+        MainScreen.newsDescription.check(matches(isDisplayed()));
+        MainScreen.categoryIcon.perform(click());
+        MainScreen.newsDescriptionAfterCollapse.check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
     }
 
     @Test
     public void openSingleClaim() {
-        ViewInteraction firstClaim = onView(
-                allOf(withIndex(withId(R.id.executor_name_material_text_view), 0)));
-        firstClaim.perform(click());
-
-        ViewInteraction status = onView(
-                allOf(withId(R.id.status_label_text_view), withText("In progress"),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(androidx.cardview.widget.CardView.class))),
-                        isDisplayed()));
-        status.check(matches(isDisplayed()));
-        ViewInteraction backButton = onView(withId(R.id.close_image_button)).perform(nestedScrollTo());
-        ViewInteraction buttonAddComment = onView(
-                allOf(withId(R.id.add_comment_image_button), withContentDescription("button add comment"),
-                        withParent(withParent(withId(R.id.comments_material_card_view))),
-                        isDisplayed()));
-        buttonAddComment.check(matches(isDisplayed()));
-
-        backButton.perform(click());
-        ViewInteraction allNews = onView((withId(R.id.all_news_text_view))).check(matches(isDisplayed()));
+        MainScreen.firstClaimExecutorName.perform(click());
+        EditClaimScreen.claimStatus.check(matches(isDisplayed()));
+        EditClaimScreen.backButton.perform(nestedScrollTo());
+        EditClaimScreen.buttonAddComment.check(matches(isDisplayed()));
+        EditClaimScreen.backButton.perform(click());
+        MainScreen.allNews.check(matches(isDisplayed()));
     }
 
     @Test
@@ -314,54 +152,52 @@ public class AppActivityTest {
         String newClaimTitleString = "Некое описание " + getCurrentDate();
         String currentDate = getCurrentDate();
         String currentTime = getCurrentTime();
-        ViewInteraction buttonCreateClaim = onView(withId(R.id.add_new_claim_material_button)).perform(click());
+        MainScreen.addNewClaimButton.perform(click());
         SystemClock.sleep(2000);
 
-        ViewInteraction title = onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        ViewInteraction subTitle = onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("Claims")));
+        CreateClaimScreen.title.check(matches(withText("Creating")));
+        CreateClaimScreen.subTitle.check(matches(withText("Claims")));
 
-        ViewInteraction claimTitle = onView(withId(R.id.title_edit_text)).perform(replaceText("Здравствуйте, я ваша тетя и я не влезу в это поле ввода"));
-        claimTitle.check(matches(withText("Здравствуйте, я ваша тетя и я не влезу в это поле ")));
+        CreateClaimScreen.claimTitle.perform(replaceText("Здравствуйте, я ваша тетя и я не влезу в это поле ввода"));
+        CreateClaimScreen.claimTitle.check(matches(withText("Здравствуйте, я ваша тетя и я не влезу в это поле ")));
 
-        onView(withId(R.id.save_button)).perform(click());
-        onView(withText("Fill empty fields")).check(matches(isDisplayed()));
-        onView(withText("OK")).perform(click());
+        CommonElements.buttonSave.perform(click());
+        CreateClaimScreen.toastEmptyFields.check(matches(isDisplayed()));
+        CommonElements.buttonOkText.perform(click());
 
-        claimTitle.perform(clearText(), replaceText(claimTitleString));
-        onView(withId(R.id.executor_drop_menu_auto_complete_text_view)).perform(click());
+        CreateClaimScreen.claimTitle.perform(clearText(), replaceText(claimTitleString));
+        CreateClaimScreen.executorList.perform(click());
+        SystemClock.sleep(2000);
+        CreateClaimScreen.claimTitle.perform(click());
+
+        CreateClaimScreen.claimDate.perform(replaceText(currentDate));
+        CreateClaimScreen.claimTime.perform(replaceText(currentTime));
+        CreateClaimScreen.claimDescription.perform(replaceText(newClaimTitleString));
 
         SystemClock.sleep(2000);
-        claimTitle.perform(click());
+        CreateClaimScreen.claimDescription.perform(closeSoftKeyboard());
+        CommonElements.buttonCancel.perform(click());
+        CommonElements.buttonCancelText.perform(click());
+        CreateClaimScreen.title.check(matches(isDisplayed()));
 
-        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText(currentDate));
-        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText(currentTime));
-        onView(withId(R.id.description_edit_text)).perform(replaceText(newClaimTitleString));
+        CommonElements.buttonCancel.perform(click());
+        CommonElements.buttonOkText.perform(click());
+        MainScreen.news.check(matches(isDisplayed()));
 
+        MainScreen.addNewClaimButton.perform(click());
+        CreateClaimScreen.title.check(matches(isDisplayed()));
+        CreateClaimScreen.subTitle.check(matches(isDisplayed()));
+        CreateClaimScreen.claimTitle.perform(replaceText(claimTitleString));
+        CreateClaimScreen.executorList.perform(click());
         SystemClock.sleep(2000);
-        onView(withId(R.id.description_edit_text)).perform(closeSoftKeyboard());
-        onView(withId(R.id.cancel_button)).perform(click());
-        onView(withText("CANCEL")).perform(click());
-        title.check(matches(isDisplayed()));
+        CreateClaimScreen.claimTitle.perform(click());
+        CreateClaimScreen.claimDate.perform(replaceText(currentDate));
+        CreateClaimScreen.claimTime.perform(replaceText(currentTime));
+        CreateClaimScreen.claimDescription.perform(replaceText(newClaimTitleString));
+        CreateClaimScreen.claimDescription.perform(closeSoftKeyboard());
+        CommonElements.buttonSave.perform(click());
 
-        onView(withId(R.id.cancel_button)).perform(click());
-        onView(withText("OK")).perform(click());
-        ViewInteraction news = onView((withText("News")));
-        news.check(matches(isDisplayed()));
-
-        buttonCreateClaim.perform(click());
-        title.check(matches(isDisplayed()));
-        subTitle.check(matches(isDisplayed()));
-        claimTitle.perform(replaceText(claimTitleString));
-        onView(withId(R.id.executor_drop_menu_auto_complete_text_view)).perform(click());
-        SystemClock.sleep(2000);
-        claimTitle.perform(click());
-        onView(withId(R.id.date_in_plan_text_input_edit_text)).perform(replaceText(currentDate));
-        onView(withId(R.id.time_in_plan_text_input_edit_text)).perform(replaceText(currentTime));
-        onView(withId(R.id.description_edit_text)).perform(replaceText(newClaimTitleString));
-        onView(withId(R.id.description_edit_text)).perform(closeSoftKeyboard());
-        onView(withId(R.id.save_button)).perform(click());
-
-        ViewInteraction allClaims = onView((withId(R.id.all_claims_text_view))).perform(click());
+        MainScreen.allClaims.perform(click());
 
         if (isDisplayedWithSwipe(onView(withText(claimTitleString)), 2, true)) {
             onView(withText(claimTitleString)).check(matches(isDisplayed()));
@@ -371,373 +207,299 @@ public class AppActivityTest {
         ;
     }
 
-    public void checkClaimStatus(String status) {
-        ViewInteraction firstClaim = onView(
-                allOf(withIndex(withId(R.id.executor_name_material_text_view), 0)));
-        SystemClock.sleep(1000);
-        firstClaim.perform(click());
-        ViewInteraction claimStatus = onView(
-                allOf(withId(R.id.status_label_text_view),
-                        withParent(withParent(IsInstanceOf.<View>instanceOf(androidx.cardview.widget.CardView.class)))));
-        SystemClock.sleep(1000);
-        claimStatus.check(matches(allOf(isDisplayed(), withText(status))));
-        ViewInteraction backButton = onView(withId(R.id.close_image_button)).perform(nestedScrollTo());
-        backButton.perform(click());
-    }
-
     @Test
     public void filteringClaims() {
-        onView((withId(R.id.all_claims_text_view))).perform(click());
-        ViewInteraction buttonFiltering = onView((withId(R.id.filters_material_button))).perform(click());
-        ViewInteraction titleFiltering = onView((withId(R.id.claim_filter_dialog_title))).check(matches(isDisplayed()));
-        ViewInteraction inProgress = onView((withId(R.id.item_filter_in_progress))).perform(click());
-        ViewInteraction buttonCancel = onView((withId(R.id.claim_filter_cancel_material_button))).perform(click());
-        buttonFiltering.perform(click());
-        inProgress.check(matches(isChecked()));
+        MainScreen.allClaims.perform(click());
+        ClaimScreen.buttonFiltering.perform(click());
+        ClaimScreen.titleFiltering.check(matches(isDisplayed()));
+        ClaimScreen.inProgress.perform(click());
+        ClaimScreen.buttonCancel.perform(click());
+        ClaimScreen.buttonFiltering.perform(click());
+        ClaimScreen.inProgress.check(matches(isChecked()));
 
-        inProgress.perform(click());
-        ViewInteraction buttonOk = onView((withId(R.id.claim_list_filter_ok_material_button))).perform(click());
+        ClaimScreen.inProgress.perform(click());
+        ClaimScreen.buttonOk.perform(click());
         checkClaimStatus("Open");
-        ViewInteraction claims = onView(withText("Claims")).check(matches(isDisplayed()));
+        ClaimScreen.claims.check(matches(isDisplayed()));
 
-        buttonFiltering.perform(click());
-        ViewInteraction open = onView((withId(R.id.item_filter_open))).perform(click());
-        open.check(matches(isNotChecked()));
-        inProgress.perform(click());
-        inProgress.check(matches(isChecked()));
-        buttonOk.perform(click());
+        ClaimScreen.buttonFiltering.perform(click());
+        ClaimScreen.open.perform(click());
+        ClaimScreen.open.check(matches(isNotChecked()));
+        ClaimScreen.inProgress.perform(click());
+        ClaimScreen.inProgress.check(matches(isChecked()));
+        ClaimScreen.buttonOk.perform(click());
         checkClaimStatus("In progress");
-        claims.check(matches(isDisplayed()));
+        ClaimScreen.claims.check(matches(isDisplayed()));
 
-        buttonFiltering.perform(click());
-        ViewInteraction executed = onView((withId(R.id.item_filter_executed))).perform(click());
-        executed.check(matches(isChecked()));
-        inProgress.perform(click());
-        inProgress.check(matches(isNotChecked()));
-        buttonOk.perform(click());
+        ClaimScreen.buttonFiltering.perform(click());
+        ClaimScreen.executed.perform(click());
+        ClaimScreen.executed.check(matches(isChecked()));
+        ClaimScreen.inProgress.perform(click());
+        ClaimScreen.inProgress.check(matches(isNotChecked()));
+        ClaimScreen.buttonOk.perform(click());
         checkClaimStatus("Executed");
-        claims.check(matches(isDisplayed()));
+        ClaimScreen.claims.check(matches(isDisplayed()));
 
-        buttonFiltering.perform(click());
-        ViewInteraction cancelled = onView((withId(R.id.item_filter_cancelled))).perform(click());
-        cancelled.check(matches(isChecked()));
-        executed.perform(click());
-        executed.check(matches(isNotChecked()));
-        buttonOk.perform(click());
+        ClaimScreen.buttonFiltering.perform(click());
+        ClaimScreen.cancelled.perform(click());
+        ClaimScreen.cancelled.check(matches(isChecked()));
+        ClaimScreen.executed.perform(click());
+        ClaimScreen.executed.check(matches(isNotChecked()));
+        ClaimScreen.buttonOk.perform(click());
         checkClaimStatus("Canceled");
-        claims.check(matches(isDisplayed()));
+        ClaimScreen.claims.check(matches(isDisplayed()));
     }
 
     @Test
     public void claimScreen() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("Claims")).perform(click());
-        onView(withText("Claims")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuClaims.perform(click());
+        ClaimScreen.claims.check(matches(isDisplayed()));
 
-        onView(withId(R.id.add_new_claim_material_button)).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("Claims")));
+        ClaimScreen.addNewClaimButton.perform(click());
+        CreateClaimScreen.title.check(matches(withText("Creating")));
+        CreateClaimScreen.subTitle.check(matches(withText("Claims")));
     }
 
     @Test
     public void newsScreenSorting() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        String firstNews = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
-        ViewInteraction buttonSort = onView(withId(R.id.sort_news_material_button)).perform(click());
-        String lastNews = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
-        buttonSort.perform(click());
-        String firstNewsAgain = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
+        String firstNews = TextHelpers.getText(NewsScreen.firstNews);
+        NewsScreen.buttonSort.perform(click());
+        String lastNews = TextHelpers.getText(NewsScreen.lastNews);
+        NewsScreen.buttonSort.perform(click());
+        String firstNewsAgain = TextHelpers.getText(NewsScreen.firstNewsAgain);
         assertEquals(firstNews, firstNewsAgain);
         assertNotEquals(firstNews, lastNews);
     }
 
     @Test
     public void controlPanelSorting() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        onView(withId(R.id.edit_news_material_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        NewsScreen.buttonControlPanel.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        String firstNews = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
-        ViewInteraction buttonSort = onView(withId(R.id.sort_news_material_button)).perform(click());
-        String lastNews = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
-        buttonSort.perform(click());
-        String firstNewsAgain = TextHelpers.getText(onView(withIndex(withId(R.id.news_item_title_text_view), 0)));
+        String firstNews = TextHelpers.getText(NewsScreen.firstNews);
+        String firstPublicationDate = TextHelpers.getText(ControlPanel.firstPublicationDate);
+        String firstCreationDate = TextHelpers.getText(ControlPanel.firstCreationDate);
+        NewsScreen.buttonSort.perform(click());
+        String lastPublicationDate = TextHelpers.getText(ControlPanel.lastPublicationDate);
+        NewsScreen.buttonSort.perform(click());
+        String firstNewsAgain = TextHelpers.getText(NewsScreen.firstNewsAgain);
+        String firstPublicationDateAgain = TextHelpers.getText(ControlPanel.firstPublicationDateAgain);
+        String firstCreationDateAgain = TextHelpers.getText(ControlPanel.firstCreationDateAgain);
         assertEquals(firstNews, firstNewsAgain);
-        assertNotEquals(firstNews, lastNews);
+        assertEquals(firstPublicationDate, firstPublicationDateAgain);
+        assertEquals(firstCreationDate, firstCreationDateAgain);
+        assertNotEquals(firstPublicationDate, lastPublicationDate);
     }
-
-    String newsTitle = "Некий заголовок";
-    String newsDescription = "Пробе пера";
-    String newsPublicationDate = "07.04.2022";
 
     @Test
     public void controlPanelCreateNews() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        onView(withId(R.id.edit_news_material_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        NewsScreen.buttonControlPanel.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withId(R.id.add_news_image_view)).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
+        ControlPanel.buttonCreateNews.perform(click());
+        CreateNewsScreen.title.check(matches(withText("Creating")));
+        CreateNewsScreen.subTitle.check(matches(withText("News")));
 
-        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle),
-                closeSoftKeyboard());
-        onView(withId(R.id.cancel_button)).perform(click());
-        onView(withText("Cancel")).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).check(matches(withText(newsTitle)));
+        CreateNewsScreen.categoryList.perform(click());
+        CreateNewsScreen.newsTitle.perform(click());
+        CreateNewsScreen.newsTitle.perform(replaceText(newsTitle), closeSoftKeyboard());
+        CommonElements.buttonCancel.perform(click());
+        CommonElements.buttonCancelText.perform(click());
+        CreateNewsScreen.newsTitle.check(matches(withText(newsTitle)));
 
-        onView(withId(R.id.cancel_button)).perform(click());
-        onView(withText("OK")).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        CommonElements.buttonCancel.perform(click());
+        CommonElements.buttonOkText.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withId(R.id.add_news_image_view)).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
-        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle));
-        onView(withId(R.id.news_item_publish_date_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_time_text_input_edit_text)).perform(replaceText("07:22"));
-        onView(withId(R.id.news_item_description_text_input_edit_text)).perform(replaceText(newsDescription),
-                closeSoftKeyboard());
-        onView(withId(R.id.switcher)).check(matches(allOf(withText("Active"), isDisplayed())));
+        ControlPanel.buttonCreateNews.perform(click());
+        CreateNewsScreen.title.check(matches(withText("Creating")));
+        CreateNewsScreen.subTitle.check(matches(withText("News")));
+        CreateNewsScreen.categoryList.perform(click());
+        CreateNewsScreen.newsTitle.perform(click());
+        CreateNewsScreen.newsTitle.perform(replaceText(newsTitle));
+        CreateNewsScreen.newsDate.perform(replaceText(newsPublicationDate));
+        CreateNewsScreen.newsTime.perform(replaceText("07:22"));
+        CreateNewsScreen.newsDescription.perform(replaceText(newsDescriptionString), closeSoftKeyboard());
+        CreateNewsScreen.newsSwitcher.check(matches(allOf(withText("Active"), isDisplayed())));
 
-        onView(withId(R.id.save_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        CommonElements.buttonSave.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
         if (isDisplayedWithSwipe(onView(withText(newsTitle)), 1, true)) {
             onView(withText(newsTitle)).check(matches(isDisplayed()));
         }
 
         onView(allOf(withId(R.id.delete_news_item_image_view), withParent(withParent(allOf(withId(R.id.news_item_material_card_view), withChild(withChild(withText(newsTitle)))))))).perform(click());
-        onView(withText("OK")).perform(click());
+        CommonElements.buttonOkText.perform(click());
     }
 
 
     @Test
     public void newsScreenFiltering() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        onView(withId(R.id.edit_news_material_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
-        onView(withId(R.id.add_news_image_view)).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
-        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle));
-        onView(withId(R.id.news_item_publish_date_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_time_text_input_edit_text)).perform(replaceText("07:22"));
-        onView(withId(R.id.news_item_description_text_input_edit_text)).perform(replaceText(newsDescription),
-                closeSoftKeyboard());
-        onView(withId(R.id.switcher)).check(matches(allOf(withText("Active"), isDisplayed())));
+        NewsScreen.buttonControlPanel.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withId(R.id.save_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        ControlPanel.buttonCreateNews.perform(click());
+        CreateNewsScreen.title.check(matches(withText("Creating")));
+        CreateNewsScreen.subTitle.check(matches(withText("News")));
+        CreateNewsScreen.categoryList.perform(click());
+        CreateNewsScreen.newsTitle.perform(click());
+        CreateNewsScreen.newsTitle.perform(replaceText(newsTitle));
+        CreateNewsScreen.newsDate.perform(replaceText(newsPublicationDate));
+        CreateNewsScreen.newsTime.perform(replaceText("07:22"));
+        CreateNewsScreen.newsDescription.perform(replaceText(newsDescriptionString), closeSoftKeyboard());
+        CreateNewsScreen.newsSwitcher.check(matches(allOf(withText("Active"), isDisplayed())));
 
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.buttonSave.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withId(R.id.filter_news_material_button)).perform(click());
-        onView(withId(R.id.news_item_publish_date_start_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_date_end_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.filter_button)).perform(click());
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        onView(withIndex(withId(R.id.news_item_date_text_view), 0)).check(matches(withText(newsPublicationDate)));
+        NewsScreen.buttonFilter.perform(click());
+        NewsFilterScreen.publishDateStart.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.publishDateEnd.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.buttonFilter.perform(click());
 
-        onView(withId(R.id.edit_news_material_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        NewsScreen.firstNewsDate.check(matches(withText(newsPublicationDate)));
 
-        onView(withId(R.id.filter_news_material_button)).perform(click());
-        onView(withId(R.id.news_item_publish_date_start_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_date_end_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.filter_button)).perform(click());
+        NewsScreen.buttonControlPanel.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withIndex(withId(R.id.news_item_publication_date_text_view), 0)).check(matches(withText(newsPublicationDate)));
+        NewsScreen.buttonFilter.perform(click());
+        NewsFilterScreen.publishDateStart.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.publishDateEnd.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.buttonFilter.perform(click());
 
-        onView(withIndex(withId(R.id.edit_news_item_image_view), 0)).perform(click());
-        onView(withId(R.id.switcher)).perform(click());
-        onView(withId(R.id.save_button)).perform(click());
+        ControlPanel.firstPublicationDate.check(matches(withText(newsPublicationDate)));
 
-        onView(withId(R.id.filter_news_material_button)).perform(click());
-        onView(withId(R.id.news_item_publish_date_start_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_date_end_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.filter_news_active_material_check_box)).perform(click()).check(matches(isNotChecked()));
-        onView(withId(R.id.filter_news_inactive_material_check_box)).check(matches(isChecked()));
-        onView(withId(R.id.filter_button)).perform(click());
+        ControlPanel.buttonEditNews.perform(click());
+        CreateNewsScreen.newsSwitcher.perform(click());
+        CommonElements.buttonSave.perform(click());
 
-        onView(withIndex(withId(R.id.news_item_publication_date_text_view), 0)).check(matches(withText(newsPublicationDate)));
-        onView(withIndex(withId(R.id.news_item_published_text_view), 0)).check(matches(withText("Not active")));
+        NewsScreen.buttonFilter.perform(click());
+        NewsFilterScreen.publishDateStart.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.publishDateEnd.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.checkboxActive.perform(click()).check(matches(isNotChecked()));
+        NewsFilterScreen.checkboxNotActive.check(matches(isChecked()));
+        NewsFilterScreen.buttonFilter.perform(click());
 
-        onView(withIndex(withId(R.id.edit_news_item_image_view), 0)).perform(click());
-        onView(withId(R.id.switcher)).perform(click());
-        onView(withId(R.id.save_button)).perform(click());
+        ControlPanel.firstPublicationDateNotActive.check(matches(withText(newsPublicationDate)));
+        ControlPanel.newsStatus.check(matches(withText("Not active")));
 
-        onView(withId(R.id.filter_news_material_button)).perform(click());
-        onView(withId(R.id.news_item_publish_date_start_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_date_end_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.filter_news_active_material_check_box)).check(matches(isChecked()));
-        onView(withId(R.id.filter_news_inactive_material_check_box)).perform(click()).check(matches(isNotChecked()));
-        onView(withId(R.id.filter_button)).perform(click());
+        ControlPanel.buttonEditNewsNotActive.perform(click());
+        CreateNewsScreen.newsSwitcher.perform(click());
+        CommonElements.buttonSave.perform(click());
 
-        onView(withIndex(withId(R.id.news_item_publication_date_text_view), 0)).check(matches(withText(newsPublicationDate)));
-        onView(withIndex(withId(R.id.news_item_published_text_view), 0)).check(matches(withText("Active")));
+        NewsScreen.buttonFilter.perform(click());
+        NewsFilterScreen.publishDateStart.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.publishDateEnd.perform(replaceText(newsPublicationDate));
+        NewsFilterScreen.checkboxActive.check(matches(isChecked()));
+        NewsFilterScreen.checkboxNotActive.perform(click()).check(matches(isNotChecked()));
+        NewsFilterScreen.buttonFilter.perform(click());
 
-        onView(withId(R.id.delete_news_item_image_view)).perform(click());
-        onView(withText("OK")).perform(click());
-    }
+        ControlPanel.firstPublicationDateActive.check(matches(withText(newsPublicationDate)));
+        ControlPanel.newsStatusActive.check(matches(withText("Active")));
 
-    public boolean isDisplayedWithSwipe(ViewInteraction locator, int recycler, boolean finishSwipe) {
-        try {
-            locator.check(matches(isDisplayed()));
-            return true;
-        } catch (NoMatchingViewException ignored) {
-        }
-        boolean invis = true;
-        int n = 1;
-        while (invis) {
-            try {
-                if (recycler == 1) {
-                    onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
-                } else {
-                    onView(allOf(withId(R.id.claim_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
-                }
-            } catch (PerformException e) {
-                return false;
-            }
-            try {
-                locator.check(matches(isDisplayed()));
-                invis = false;
-            } catch (NoMatchingViewException e) {
-                invis = true;
-            }
-            n++;
-            if (!invis & finishSwipe) {
-                try {
-                    if (recycler == 1) {
-                        onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
-                    } else {
-                        onView(allOf(withId(R.id.claim_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
-                    }
-                } catch (PerformException e) {
-                    return false;
-                }
-            }
-            if (n > 400) {
-                return false;
-            }
-            SystemClock.sleep(2000);
-        }
-        ;
-        return true;
+        ControlPanel.buttonDeleteNews.perform(click());
+        CommonElements.buttonOkText.perform(click());
     }
 
     @Test
     public void newsEditingDeleting() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("News")).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuNews.perform(click());
+        NewsScreen.news.check(matches(isDisplayed()));
 
-        onView(withId(R.id.edit_news_material_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        NewsScreen.buttonControlPanel.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
-        onView(withId(R.id.add_news_image_view)).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Creating")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
-        onView(withId(R.id.news_item_category_text_auto_complete_text_view)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(click());
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newsTitle));
-        onView(withId(R.id.news_item_publish_date_text_input_edit_text)).perform(replaceText(newsPublicationDate));
-        onView(withId(R.id.news_item_publish_time_text_input_edit_text)).perform(replaceText(getCurrentTime()));
-        onView(withId(R.id.news_item_description_text_input_edit_text)).perform(replaceText(newsDescription),
-                closeSoftKeyboard());
-        onView(withId(R.id.switcher)).check(matches(allOf(withText("Active"), isDisplayed())));
+        ControlPanel.buttonCreateNews.perform(click());
+        CreateNewsScreen.title.check(matches(withText("Creating")));
+        CreateNewsScreen.subTitle.check(matches(withText("News")));
+        CreateNewsScreen.categoryList.perform(click());
+        CreateNewsScreen.newsTitle.perform(click());
+        CreateNewsScreen.newsTitle.perform(replaceText(newsTitle));
+        CreateNewsScreen.newsDate.perform(replaceText(newsPublicationDate));
+        CreateNewsScreen.newsTime.perform(replaceText("07:22"));
+        CreateNewsScreen.newsDescription.perform(replaceText(newsDescriptionString), closeSoftKeyboard());
+        CreateNewsScreen.newsSwitcher.check(matches(allOf(withText("Active"), isDisplayed())));
 
-        onView(withId(R.id.save_button)).perform(click());
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        CommonElements.buttonSave.perform(click());
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
 
         if (isDisplayedWithSwipe(onView(withText(newsTitle)), 1, true)) {
             onView(withText(newsTitle)).check(matches(isDisplayed())).perform(click());
         }
 
-        String result = TextHelpers.getText(onView(withText(newsDescription)));
-        assertEquals(result, newsDescription);
+        ControlPanel.newsDescription.check(matches(isDisplayed()));
         onView(withText(newsTitle)).perform(click());
         SystemClock.sleep(1500);
-        onView(withText(newsDescription)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
+        ControlPanel.newsDescription.check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)));
 
-        onView(allOf(withId(R.id.edit_news_item_image_view), withParent(withParent(allOf(withId(R.id.news_item_material_card_view), withChild(withChild(withText(newsTitle)))))))).perform(click());
-        onView(withId(R.id.custom_app_bar_title_text_view)).check(matches(withText("Editing")));
-        onView(withId(R.id.custom_app_bar_sub_title_text_view)).check(matches(withText("News")));
-        onView(withId(R.id.news_item_title_text_input_edit_text)).check(matches(withText(newsTitle)));
-        String newNewsTitle = "Чудо чудесное";
-        onView(withId(R.id.news_item_title_text_input_edit_text)).perform(replaceText(newNewsTitle));
-        onView(withId(R.id.save_button)).perform(click());
+        ControlPanel.newsEdit.perform(click());
+        CreateNewsScreen.title.check(matches(withText("Editing")));
+        CreateNewsScreen.subTitle.check(matches(withText("News")));
+        CreateNewsScreen.newsTitle.check(matches(withText(newsTitle)));
+        CreateNewsScreen.newsTitle.perform(replaceText(newNewsTitle));
+        CommonElements.buttonSave.perform(click());
 
-        onView(withText("Control panel")).check(matches(isDisplayed()));
+        NewsScreen.controlPanel.check(matches(isDisplayed()));
         if (isDisplayedWithSwipe(onView(withText(newNewsTitle)), 1, true)) {
             onView(withText(newNewsTitle)).check(matches(isDisplayed()));
         }
 
-        onView(allOf(withId(R.id.delete_news_item_image_view), withParent(withParent(allOf(withId(R.id.news_item_material_card_view), withChild(withChild(withText(newNewsTitle)))))))).perform(click());
-        onView(withText("OK")).perform(click());
+        ControlPanel.newsDelete.perform(click());
+        CommonElements.buttonOkText.perform(click());
         SystemClock.sleep(1500);
         if (isDisplayedWithSwipe(onView(withText(newNewsTitle)), 1, false)) {
-            onView(withText(newNewsTitle)).check(matches(not(isDisplayed())));
+            throw new NoSuchElementException("Not delete!");
         }
-    }
-
-    public String getCurrentDate() {
-        Date currentDate = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy", Locale.getDefault());
-        return dateFormat.format(currentDate);
-    }
-
-    public String getCurrentTime() {
-        Date currentDate = new Date();
-        DateFormat dateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        return dateFormat.format(currentDate);
     }
 
     @Test
     public void aboutScreenAndBackToMain() {
-        onView(withId(R.id.main_menu_image_button)).perform(click());
-        onView(withText("About")).perform(click());
-        onView(withId(R.id.about_version_title_text_view)).check(matches(allOf(withText("Version:"), isDisplayed())));
-        onView(withId(R.id.about_version_value_text_view)).check(matches(allOf(withText("1.0.0"), isDisplayed())));
-        onView(withId(R.id.about_privacy_policy_value_text_view)).check(matches(allOf(withText("https://vhospice.org/#/privacy-policy/"), isDisplayed(), isClickable())));
-        onView(withId(R.id.about_terms_of_use_label_text_view)).check(matches(allOf(withText("Terms of use:"), isDisplayed())));
-        onView(withId(R.id.about_terms_of_use_value_text_view)).check(matches(allOf(withText("https://vhospice.org/#/terms-of-use"), isDisplayed(), isClickable())));
-        onView(withId(R.id.about_company_info_label_text_view)).check(matches(allOf(withText("© I-Teco, 2022"), isDisplayed())));
+        CommonElements.mainMenu.perform(click());
+        CommonElements.menuAbout.perform(click());
+        AboutScreen.versionTitle.check(matches(allOf(withText("Version:"), isDisplayed())));
+        AboutScreen.version.check(matches(allOf(withText("1.0.0"), isDisplayed())));
+        AboutScreen.privacyPolicy.check(matches(allOf(withText("https://vhospice.org/#/privacy-policy/"), isDisplayed(), isClickable())));
+        AboutScreen.termsTitle.check(matches(allOf(withText("Terms of use:"), isDisplayed())));
+        AboutScreen.termsUrl.check(matches(allOf(withText("https://vhospice.org/#/terms-of-use"), isDisplayed(), isClickable())));
+        AboutScreen.copyright.check(matches(allOf(withText("© I-Teco, 2022"), isDisplayed())));
 
-        onView(withId(R.id.about_back_image_button)).perform(click());
-        onView(withText("News")).check(matches(isDisplayed()));
-        onView(withText("Claims")).check(matches(isDisplayed()));
+        AboutScreen.buttonBack.perform(click());
+        MainScreen.allNews.check(matches(isDisplayed()));
+        MainScreen.allClaims.check(matches(isDisplayed()));
     }
 
     @Test
     public void thematicQuotes() {
-        onView(withId(R.id.our_mission_image_button)).perform(click());
-        onView(withId(R.id.our_mission_title_text_view)).check(matches(allOf(withText("Love is all"), isDisplayed())));
-        onView(withIndex(withId(R.id.our_mission_item_image_view), 0)).check(matches(isDisplayed()));
-        onView(withIndex(withId(R.id.our_mission_item_title_text_view), 0)).check(matches(isDisplayed()));
-        onView(withIndex(withId(R.id.our_mission_item_title_text_view), 0)).perform(click());
-        onView(withIndex(withId(R.id.our_mission_item_description_text_view), 0)).check(matches(isDisplayed()));
+        CommonElements.thematicQuotes.perform(click());
+        ThematicQuotes.title.check(matches(allOf(withText("Love is all"), isDisplayed())));
+        ThematicQuotes.icon.check(matches(isDisplayed()));
+        ThematicQuotes.thematicTitle.check(matches(isDisplayed()));
+        ThematicQuotes.thematicTitleClickable.perform(click());
+        ThematicQuotes.thematicDescription.check(matches(isDisplayed()));
 
-        onView(withIndex(withId(R.id.our_mission_item_title_text_view), 0)).perform(click());
-        onView(withIndex(withId(R.id.our_mission_item_description_text_view), 0)).check(matches(not(isDisplayed())));
+        ThematicQuotes.thematicTitleClickable2.perform(click());
+        ThematicQuotes.thematicDescriptionAfterClick.check(matches(not(isDisplayed())));
     }
 }

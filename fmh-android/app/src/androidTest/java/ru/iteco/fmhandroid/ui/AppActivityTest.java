@@ -15,9 +15,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 import static androidx.test.espresso.matcher.ViewMatchers.isNotChecked;
 import static androidx.test.espresso.matcher.ViewMatchers.withChild;
-import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
-import static androidx.test.espresso.matcher.ViewMatchers.withHint;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
@@ -25,16 +23,18 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-
-import static ru.iteco.fmhandroid.ui.utils.Utils.*;
+import static ru.iteco.fmhandroid.ui.utils.Utils.TextHelpers;
+import static ru.iteco.fmhandroid.ui.utils.Utils.checkClaimStatus;
+import static ru.iteco.fmhandroid.ui.utils.Utils.getCurrentDate;
+import static ru.iteco.fmhandroid.ui.utils.Utils.getCurrentTime;
+import static ru.iteco.fmhandroid.ui.utils.Utils.isDisplayedWithSwipe;
+import static ru.iteco.fmhandroid.ui.utils.Utils.nestedScrollTo;
 
 import android.os.SystemClock;
 
 import androidx.test.espresso.NoMatchingViewException;
-import androidx.test.espresso.ViewInteraction;
 import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,22 +43,22 @@ import org.junit.runner.RunWith;
 
 import java.util.NoSuchElementException;
 
+import io.qameta.allure.android.runners.AllureAndroidJUnit4;
 import ru.iteco.fmhandroid.R;
+import ru.iteco.fmhandroid.ui.elements.AboutScreen;
 import ru.iteco.fmhandroid.ui.elements.AuthorizationScreen;
+import ru.iteco.fmhandroid.ui.elements.ClaimScreen;
+import ru.iteco.fmhandroid.ui.elements.CommonElements;
+import ru.iteco.fmhandroid.ui.elements.ControlPanel;
+import ru.iteco.fmhandroid.ui.elements.CreateClaimScreen;
+import ru.iteco.fmhandroid.ui.elements.CreateNewsScreen;
 import ru.iteco.fmhandroid.ui.elements.EditClaimScreen;
 import ru.iteco.fmhandroid.ui.elements.MainScreen;
-import ru.iteco.fmhandroid.ui.elements.NewsScreen;
-import ru.iteco.fmhandroid.ui.elements.CreateClaimScreen;
-import ru.iteco.fmhandroid.ui.elements.CommonElements;
-import ru.iteco.fmhandroid.ui.elements.ClaimScreen;
-import ru.iteco.fmhandroid.ui.elements.ControlPanel;
-import ru.iteco.fmhandroid.ui.elements.CreateNewsScreen;
 import ru.iteco.fmhandroid.ui.elements.NewsFilterScreen;
-import ru.iteco.fmhandroid.ui.elements.AboutScreen;
+import ru.iteco.fmhandroid.ui.elements.NewsScreen;
 import ru.iteco.fmhandroid.ui.elements.ThematicQuotes;
 
-@RunWith(AndroidJUnit4.class)
-//@RunWith(AllureAndroidJUnit4.class)
+@RunWith(AllureAndroidJUnit4.class)
 public class AppActivityTest {
     NewsScreen NewsScreen = new NewsScreen();
     MainScreen MainScreen = new MainScreen();

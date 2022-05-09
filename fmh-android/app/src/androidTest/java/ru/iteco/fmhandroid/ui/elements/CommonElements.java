@@ -14,6 +14,7 @@ public class CommonElements {
     public ViewInteraction buttonCancel = onView(withId(R.id.cancel_button));
     public ViewInteraction buttonCancelText = onView(withText("CANCEL"));
     public ViewInteraction mainMenu = onView(withId(R.id.main_menu_image_button));
+    public ViewInteraction menuMain = onView(withText("Main"));
     public ViewInteraction menuClaims = onView(withText("Claims"));
     public ViewInteraction menuNews = onView(withText("News"));
     public ViewInteraction menuAbout = onView(withText("About"));

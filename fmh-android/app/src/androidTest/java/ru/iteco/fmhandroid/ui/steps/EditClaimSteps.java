@@ -14,7 +14,6 @@ public class EditClaimSteps {
 
     public void isClaimsEditScreen() {
         EditClaimScreen.claimStatus.check(matches(isDisplayed()));
-        EditClaimScreen.buttonAddComment.check(matches(isDisplayed()));
     }
 
     public void backFromClaim() {

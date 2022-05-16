@@ -8,6 +8,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibilit
 
 import static org.hamcrest.CoreMatchers.not;
 
+import android.os.SystemClock;
+
 import androidx.test.espresso.matcher.ViewMatchers;
 
 import ru.iteco.fmhandroid.ui.elements.MainScreen;
@@ -72,5 +74,6 @@ public class MainSteps {
 
     public void createClaim() {
         MainScreen.addNewClaimButton.perform(click());
+        SystemClock.sleep(1000);
     }
     }

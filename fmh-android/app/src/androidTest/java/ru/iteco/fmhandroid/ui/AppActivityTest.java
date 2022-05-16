@@ -5,6 +5,7 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withChild;
+import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
@@ -19,6 +20,7 @@ import static ru.iteco.fmhandroid.ui.utils.Utils.isDisplayedWithSwipe;
 import android.os.SystemClock;
 
 import androidx.test.espresso.NoMatchingViewException;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.rule.ActivityTestRule;
 
 import org.junit.Before;
@@ -158,11 +160,12 @@ public class AppActivityTest {
         CreateClaimSteps.enterClaimTime(currentTime);
         CreateClaimSteps.enterClaimDescription(newClaimTitleString);
         CommonSteps.clickSave();
+        SystemClock.sleep(1000);
 
         MainSteps.openAllClaims();
 
         if (isDisplayedWithSwipe(onView(withText(claimTitleString)), 2, true)) {
-            onView(withText(claimTitleString)).check(matches(isDisplayed()));
+            onView(withText(claimTitleString)).check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));
         } else {
             throw new NoSuchElementException("Not found " + onView(withText(claimTitleString)).toString());
         }

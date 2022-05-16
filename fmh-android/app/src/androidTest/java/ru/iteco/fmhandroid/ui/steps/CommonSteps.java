@@ -38,12 +38,16 @@ public class CommonSteps {
         switch (screen) {
             case ("Main"):
                 CommonElements.menuMain.perform(click());
-            case ("Claims"):
-                CommonElements.menuClaims.perform(click());
+                break;
             case ("News"):
                 CommonElements.menuNews.perform(click());
+                break;
             case ("About"):
                 CommonElements.menuAbout.perform(click());
+                break;
+            case ("Claims"):
+                CommonElements.menuClaims.perform(click());
+                break;
         }
     }
 }

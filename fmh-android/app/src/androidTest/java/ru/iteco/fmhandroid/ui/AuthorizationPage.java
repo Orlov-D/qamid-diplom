@@ -53,16 +53,17 @@ public class AuthorizationPage {
 
         emptyToast.check(matches(withText("Login and password cannot be empty")));
 
-        SystemClock.sleep(1000);
+        SystemClock.sleep(1500);
         AuthorizationSteps.enterLogin(" ");
         AuthorizationSteps.enterPassword(" ");
         AuthorizationSteps.signIn();
         emptyToast.check(matches(withText("Login and password cannot be empty")));
 
-        SystemClock.sleep(1000);
+        SystemClock.sleep(1500);
         AuthorizationSteps.enterLogin("123");
         AuthorizationSteps.enterPassword("123");
         AuthorizationSteps.signIn();
+        SystemClock.sleep(1500);
         wrongToast.check(matches(withText("Wrong login or password")));
     }
 

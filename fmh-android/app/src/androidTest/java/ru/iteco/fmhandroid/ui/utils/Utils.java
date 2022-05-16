@@ -203,6 +203,51 @@ public class Utils {
                 return false;
             }
             try {
+                locator.check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)));//.check(matches(isDisplayed()));
+                invis = false;
+            } catch (NoMatchingViewException e) {
+                invis = true;
+            }
+            n++;
+            if (!invis & finishSwipe) {
+                try {
+                    if (recycler == 1) {
+                        onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                    } else {
+                        onView(allOf(withId(R.id.claim_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                    }
+                } catch (PerformException e) {
+                    return false;
+                }
+            }
+            if (n > 400) {
+                return false;
+            }
+            SystemClock.sleep(2000);
+        }
+        ;
+        return true;
+    }
+
+    public static boolean fastDown(ViewInteraction locator, int recycler, boolean finishSwipe) {
+        try {
+            locator.check(matches(isDisplayed()));
+            return true;
+        } catch (NoMatchingViewException ignored) {
+        }
+        boolean invis = true;
+        int n = 1;
+        while (invis) {
+            try {
+                if (recycler == 1) {
+                    onView(allOf(withId(R.id.news_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                } else {
+                    onView(allOf(withId(R.id.claim_list_recycler_view), isDisplayed())).perform(actionOnItemAtPosition(n, swipeUp()));
+                }
+            } catch (PerformException e) {
+                return false;
+            }
+            try {
                 locator.check(matches(isDisplayed()));
                 invis = false;
             } catch (NoMatchingViewException e) {

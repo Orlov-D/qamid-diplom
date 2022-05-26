@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.qameta.allure.android.runners.AllureAndroidJUnit4;
+import io.qameta.allure.kotlin.junit4.DisplayName;
 import ru.iteco.fmhandroid.R;
 import ru.iteco.fmhandroid.ui.steps.AuthorizationSteps;
 import ru.iteco.fmhandroid.ui.steps.CommonSteps;
@@ -45,6 +46,7 @@ public class AuthorizationPage {
     }
 
     @Test
+    @DisplayName("Проверка входа с пустой формой и под несуществующим пользователем")
     public void signInWrong() {
         AuthorizationSteps.isAuthorizationScreen();
         AuthorizationSteps.signIn();
@@ -68,6 +70,7 @@ public class AuthorizationPage {
     }
 
     @Test
+    @DisplayName("Успешный вход за пользователя и выход из приложения")
     public void signInOK() {
         AuthorizationSteps.isAuthorizationScreen();
         AuthorizationSteps.enterLogin("login2");

@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import java.util.NoSuchElementException;
 
 import io.qameta.allure.android.runners.AllureAndroidJUnit4;
+import io.qameta.allure.kotlin.junit4.DisplayName;
 import ru.iteco.fmhandroid.R;
 import ru.iteco.fmhandroid.ui.steps.AboutSteps;
 import ru.iteco.fmhandroid.ui.steps.AuthorizationSteps;
@@ -60,11 +61,11 @@ public class AppActivityTest {
     AboutSteps AboutSteps = new AboutSteps();
     ThematicQuotesSteps ThematicQuotesSteps = new ThematicQuotesSteps();
 
-    public static String newsTitleString = "Некий заголовок";
-    public static String newsDescriptionString = "Пробе пера";
-    public static String newNewsTitle = "Чудо чудесное";
-    String newsPublicationDate = "07.04.2022";
-    String newsTime = "07:22";
+    public static String newsTitleString = "Некий заголовок" + getCurrentDate() + "T" + getCurrentTime();
+    public static String newsDescriptionString = "Пробе пера" + getCurrentDate() + "T" + getCurrentTime();
+    public static String newNewsTitle = "Чудо чудесное" + getCurrentDate() + "T" + getCurrentTime();
+    String newsPublicationDate = getCurrentDate();
+    String newsTime = getCurrentTime();
 
     @Rule
     public ActivityTestRule<AppActivity> mActivityTestRule = new ActivityTestRule<>(AppActivity.class);
@@ -84,6 +85,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Разворачивание и сворачивание блока новостей и претензий")
     public void expandAll() {
         MainSteps.expandAllNews();
         MainSteps.allNewsNotDisplayed();
@@ -97,24 +99,28 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Открытие экрана новостей")
     public void openAllNews() {
         MainSteps.openAllNews();
         NewsSteps.isNewsScreen();
     }
 
     @Test
+    @DisplayName("Открытие экрана претензий")
     public void openAllClaims() {
         MainSteps.openAllClaims();
         ClaimsSteps.isClaimsScreen();
     }
 
     @Test
+    @DisplayName("Разворачивание и сворачивание одной новости")
     public void expandSingleNews() {
         MainSteps.expandSingleNews();
         MainSteps.collapseSingleNews();
     }
 
     @Test
+    @DisplayName("Открытие претензии и возврат из нее")
     public void openSingleClaim() {
         MainSteps.openSingleClaim();
         EditClaimSteps.isClaimsEditScreen();
@@ -123,6 +129,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Создание претензии")
     public void createClaim() {
         String claimTitleString = "Прувет Орл " + getCurrentDate() + "T" + getCurrentTime();
         String newClaimTitleString = "Некое описание " + getCurrentDate();
@@ -173,6 +180,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Фильтрация претензий")
     public void filteringClaims() {
         MainSteps.openAllClaims();
         ClaimsSteps.openFiltering();
@@ -215,6 +223,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Открытие экрана претензий из меню и переход к экрану создания претензии")
     public void claimScreen() {
         CommonSteps.goToScreen("Claims");
         ClaimsSteps.isClaimsScreen();
@@ -224,6 +233,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Сортировка новостей на экране новостей")
     public void newsScreenSorting() {
         CommonSteps.goToScreen("News");
         NewsSteps.isNewsScreen();
@@ -238,6 +248,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Сортировка новостей на экране управления")
     public void controlPanelSorting() {
         CommonSteps.goToScreen("News");
         NewsSteps.isNewsScreen();
@@ -260,6 +271,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Создание новости")
     public void controlPanelCreateNews() {
         CommonSteps.goToScreen("News");
         NewsSteps.isNewsScreen();
@@ -300,6 +312,7 @@ public class AppActivityTest {
 
 
     @Test
+    @DisplayName("Сортировка новостей")
     public void newsScreenFiltering() {
         CommonSteps.goToScreen("News");
         NewsSteps.isNewsScreen();
@@ -374,6 +387,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Редактирование и удаление новости")
     public void newsEditingDeleting() {
         CommonSteps.goToScreen("News");
         NewsSteps.isNewsScreen();
@@ -422,6 +436,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Открытие экрана о приложение и возврат на главный экран")
     public void aboutScreenAndBackToMain() {
         CommonSteps.goToScreen("About");
         AboutSteps.checkEverythingYouWant();
@@ -430,6 +445,7 @@ public class AppActivityTest {
     }
 
     @Test
+    @DisplayName("Открытие экрана тематических цитат и взаимодействие с цитатами")
     public void thematicQuotes() {
         CommonSteps.goToThematicQuotes();
         ThematicQuotesSteps.checkAll();

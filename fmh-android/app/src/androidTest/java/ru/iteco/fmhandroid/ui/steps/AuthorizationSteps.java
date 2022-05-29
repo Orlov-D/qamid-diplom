@@ -7,33 +7,32 @@ import static androidx.test.espresso.matcher.ViewMatchers.isClickable;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.isEnabled;
 
-import io.qameta.allure.kotlin.Step;
+import io.qameta.allure.kotlin.Allure;
 import ru.iteco.fmhandroid.ui.elements.AuthorizationScreen;
 
 public class AuthorizationSteps {
     AuthorizationScreen AuthorizationScreen = new AuthorizationScreen();
 
-    @Step("Проверка, что это экран авторизации")
     public void isAuthorizationScreen() {
+        Allure.step("Проверка, что это экран авторизации");
         AuthorizationScreen.authorization.check(matches(isDisplayed()));
     }
 
-    @Step("Ввод логина")
     public void enterLogin(String text) {
+        Allure.step("Ввод логина '" + text + "'");
         AuthorizationScreen.login.check(matches(isEnabled()));
         AuthorizationScreen.login.perform(replaceText(text));
     }
 
-    @Step("Ввод пароля")
     public void enterPassword(String text) {
+        Allure.step("Ввод пароля '" + text + "'");
         AuthorizationScreen.password.check(matches(isEnabled()));
         AuthorizationScreen.password.perform(replaceText(text));
     }
 
-    @Step("Нажатие кнопки входа")
     public void signIn() {
+        Allure.step("Нажатие кнопки входа");
         AuthorizationScreen.buttonSignIn.check(matches(isClickable()));
         AuthorizationScreen.buttonSignIn.perform(click());
     }
-
 }
